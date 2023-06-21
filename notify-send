@@ -1,0 +1,22 @@
+#!/bin/sh
+# iOS /bin/notify-send
+# depends on com.greg0109.forwardnotifier
+
+smslog=/var/log/sms.log
+curllog=/var/log/curl.log
+
+shift 3
+message="$@"
+
+dst_number='+15555555555'
+twilio_account_sid='<redacted>'
+twilio_number='+15555555555'
+twilio_auth_token='<redacted>'
+curl -X POST \
+	"https://api.twilio.com/2010-04-01/Accounts/$twilio_account_sid/Messages.json" \
+	--data-urlencode "Body=$message" \
+	--data-urlencode "From=$twilio_number" \
+	--data-urlencode "To=$dst_number" \
+	-u "$twilio_account_sid:$twilio_auth_token" >> "$curllog"
+[ "$?" -eq 0 ] && printf "%s\n" "$(date): $message" >> "$smslog"
+printf "\n" >> "$curllog"
